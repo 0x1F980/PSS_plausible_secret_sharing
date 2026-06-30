@@ -1,0 +1,26 @@
+{
+  "boot-source": {
+    "kernel_image_path": "vmlinux.bin",
+    "boot_args": "console=ttyS0 reboot=k panic=1 pci=off"
+  },
+  "drives": [
+    {
+      "drive_id": "rootfs",
+      "path_on_host": "rootfs.ext4",
+      "is_read_only": false,
+      "is_root_device": true
+    },
+    {
+      "drive_id": "pool",
+      "path_on_host": "../carriers",
+      "is_read_only": true,
+      "is_root_device": false
+    }
+  ],
+  "machine-config": {
+    "vcpu_count": 1,
+    "mem_size_mib": 128,
+    "smt": false
+  },
+  "network-interfaces": []
+}

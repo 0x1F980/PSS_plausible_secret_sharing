@@ -1,0 +1,128 @@
+.TH PSS 1 "June 2026" "PSS" "User Commands"
+.SH NAME
+pss \- Plausible Secret Sharing (Shamir ITS + transposed carriers)
+.SH SYNOPSIS
+.B pss
+.I COMMAND
+[\fIOPTIONS\fR]
+.SH DESCRIPTION
+.B pss
+implements Shamir k-of-n secret sharing over GF(256) with read-only
+transposition into untouched carrier files. Fewer than
+.I k
+carriers reveal no information about the secret (information-theoretic).
+.PP
+SHA-256 is used for public catalog identity and offset derivation only;
+security against share leakage is Shamir ITS, not hash hardness.
+.PP
+Path arguments may be
+.B -
+for stdin or stdout where supported.
+.SH COMMANDS
+.TP
+.B setup
+Select
+.I n
+untouched files from
+.BR --corpus
+matching Shamir shares; write exactly
+.I n
+files to
+.BR --output .
+.TP
+.B decode
+Reconstruct seed from share indices in
+.BR --pool .
+Default mode is sum (Shamir/Lagrange on seed shares). Combo mode requires
+.BR \-\-path-k
+path share indices to reconstruct ITS path recipe W, then chain-Lagrange decode.
+Optional
+.BR \-\-seed-k
+in combo mode cross-checks combo seed against sum decode.
+.TP
+.B combo-demo
+Run synthetic ITS path + sum chain roundtrip self-test.
+.TP
+.B verify
+Check k+1 Shamir consistency (anti false-positive).
+.TP
+.B capacity
+Report |F*|_max = L_{n-k+1} and pool utilization.
+.TP
+.BI \-\-select-top " N"
+Consider only the N largest files in the pool before selecting n (N >= n).
+.TP
+.B extract
+Deterministic transposed read walk (extract mode).
+.TP
+.B info
+Print carrier indices, sizes, catalog IDs (no writes).
+.TP
+.B tier-setup, tier-decode, tier-demo
+Fractal hierarchical Lagrange demo (compartmentation only).
+.SH OPTIONS
+.TP
+.BI \-\-corpus " DIR"
+Corpus directory for setup.
+.TP
+.BI \-\-output " DIR"
+Output directory for setup (exactly n files).
+.TP
+.BI \-\-pool " DIR"
+Carrier pool directory.
+.TP
+.BI \-\-k " K"
+Shamir threshold (legacy alias for seed indices on decode).
+.TP
+.BI \-\-n " N"
+Total share count.
+.TP
+.BI \-\-min-size " BYTES"
+Minimum carrier size filter for setup.
+.TP
+.BI \-\-file " PATH"
+Secret file for setup (default stdin).
+.TP
+.BI \-\-mode " sum|combo"
+Decode mode (default sum).
+.TP
+.BI \-\-seed-k " IDX..."
+Seed share indices for sum decode, or optional verify in combo mode.
+.TP
+.BI \-\-path-k " IDX..."
+Path share indices for combo mode (ITS recipe W).
+.TP
+.BI \-\-path-len " N"
+Path recipe byte length for combo decode (default 5).
+.TP
+.BI \-\-seed-len " N"
+Seed byte length to reconstruct (default 32).
+.TP
+.BI \-\-payload " FILE"
+OTP ciphertext file to decrypt after seed recovery (\fB-\fR for stdin/stdout).
+.TP
+.BI \-\-payload-len " N"
+Truncate decrypted payload to N bytes (must be <= ciphertext length).
+.TP
+.BI \-\-max-bytes " N"
+Max bytes for extract (default 32).
+.SH EXAMPLES
+.TP
+pss capacity --pool ./carriers --k 3 --n 5
+.TP
+pss decode --pool ./carriers 1 2 3
+.TP
+pss decode --pool ./carriers 1 2 3 --payload cipher.bin
+.TP
+pss decode --pool ./carriers 1 2 3 --payload cipher.bin --payload-len 32
+.TP
+pss decode --pool ./carriers --mode combo --path-k 1 2 --path-len 5 --seed-k 1 2 1 2 3
+.TP
+pss combo-demo
+.TP
+pss setup --corpus ./pool --output ./out --k 3 --n 5 --file seed.bin
+.SH SEE ALSO
+.BR PSS_SECURITY_LAYERS.md ,
+.BR PSS_manual.md
+.SH AUTHOR
+0x1F980 (GPL-3.0-only)
